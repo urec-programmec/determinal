@@ -620,8 +620,9 @@ class undeterminate:
 
             state_x += 1
 
-        # self.print_list(table1, self.states)
-        # self.print_list(table2, [str(i) for i in new_vertex])
+        print("Промежуточные состояния таблиц, начальная и преобразованная")
+        self.print_list(table1, self.states)
+        self.print_list(table2, [str(i) for i in new_vertex])
 
         alphabet = " ".join(self.alphabet)
         states = " ".join(["_".join(i) for i in new_vertex])
