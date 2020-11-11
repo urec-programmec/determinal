@@ -292,6 +292,7 @@ class determinate:
             new_state = self.x_childs_vertex(this_states, char)
             if new_state is None:
                 is_correct = False
+            this_states = new_state[0]
 
         if this_states in self.finalstates:
             is_correct = True

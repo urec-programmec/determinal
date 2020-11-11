@@ -76,7 +76,6 @@ class getter:
         except:
             raise Exception("Неизвестная ошибка при попытке записи автомата в файл")
 
-        print("ok")
 
     def make_filename(self, pattern, num, middle, end):
         index = pattern.rfind(".")
