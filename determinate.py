@@ -236,8 +236,9 @@ class determinate:
                     states.append(this_state)
 
                 else:
-                    this_state = states[[k.liter for k in states].index(i[2 * q])]
-                    this_state.add_transition(i)
+                    this_state = states[master.index(i[2 * q])]
+                    if i[0] == this_state.liter:
+                        this_state.add_transition(i)
 
         for this_state in states:
             this_state_rules = this_state.symbol_to_next_state
@@ -292,10 +293,13 @@ class determinate:
             new_state = self.x_childs_vertex(this_states, char)
             if new_state is None:
                 is_correct = False
+                break
             this_states = new_state[0]
 
-        if this_states in self.finalstates:
+        if is_correct and this_states in self.finalstates:
             is_correct = True
+        else:
+            is_correct = False
 
         return [is_correct, new_state]
 

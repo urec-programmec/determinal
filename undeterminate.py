@@ -94,10 +94,13 @@ class undeterminate:
         self.translate_transitions()
 
         self.now = [self.startstate].extend(self.e_childs_vertex(self.startstate))
-        self.states.pop(self.states.index(self.startstate.liter))
-        a = [self.startstate.liter]
-        a.extend(self.states)
-        self.states = a
+
+        self.states = [i.liter for i in self.vertexs]
+
+        # self.states.pop(self.states.index(self.startstate.liter))
+        # a = [self.startstate.liter]
+        # a.extend(self.states)
+        # self.states = a
 
         self.loads = self.make_str()
 
@@ -585,14 +588,28 @@ class undeterminate:
         new_vertex = [[self.states[0]]]
         state_x = 0
 
+        # пока есть новые записи, state_x  - номер уровня
         while state_x != len(new_vertex):
+            # Проходимся по алфавиту
             for item_x in range(len(self.alphabet)):
+                # Новое накопление - обнуляем, снова будем накапливать
                 state_before = set()
+
+                # Проходимся по данному уровню с новой буквой алфавита
                 for yet_one_this_vertex in new_vertex[state_x]:
+                    # Находим индекс
+
+
+
                     index = self.states.index(yet_one_this_vertex)
+                    # Если есть записи
                     if not (table1[index][item_x] is None):
+                        # Проходимся по записям
                         for state_from_table in table1[index][item_x]:
+                            # Добавляем в список новую вершину
                             state_before.add(state_from_table)
+
+                        # завоним переменную, отвечающую за изменение длины
                         len_prev = -1
                         while len_prev != len(state_before):
                             len_prev = len(state_before)

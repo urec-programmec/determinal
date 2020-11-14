@@ -17,8 +17,8 @@ def main():
 
     # undeterminate_X.print_loads()
     # determinate_X.print_loads()
-    print(determinate_X.check_string("0101001001b"))
-    print(undeterminate_X.check_string("0101001001b"))
+    print(determinate_X.check_string("1"))
+    # print(undeterminate_X.check_string("1o"))
 
 if __name__ == '__main__':
     main()
