@@ -13,6 +13,8 @@ class state:
         # ["symb3", "state1"]
         # ]
 
+
+
     def add_transition(self, rules, flag=None):
         if not flag is None:
             return

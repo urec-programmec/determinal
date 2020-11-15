@@ -233,9 +233,11 @@ class determinate:
                         this_state = state(i)
                     else:
                         this_state = state(i, True)
-                    states.append(this_state)
 
-                else:
+                    if not (this_state.liter in [ii.liter for ii in states]):
+                        states.append(this_state)
+
+                elif not ([i[1], i[2]] in states[master.index(i[2 * q])].symbol_to_next_state):
                     this_state = states[master.index(i[2 * q])]
                     if i[0] == this_state.liter:
                         this_state.add_transition(i)
@@ -492,5 +494,124 @@ class determinate:
             transitions += " ".join(i) + "\n"
 
         return alphabet + "\n" + states + "\n" + startstate + "\n" + finalstates + "\n" + transitions[:-1]
+
+    def minimise(self):
+        classes = [list(set(self.vertexs) - set(self.finalstates)), self.finalstates]
+        new_classes = []
+
+        # в [0] элементе лежат правила перехода
+
+        last_len = -1
+        while last_len != len(classes):
+            print(last_len)
+            last_len = len(classes)
+            new_classes = []
+            for this_class in classes:
+                # this_class - текущий класс, в котором будем для каждого искать
+                if len(this_class) == 1:
+                    new_classes.append(["~~~", this_class])
+                    continue
+                for vertex in this_class:
+                    slepok = []
+                    translates = vertex.symbol_to_next_state
+                    for trans in translates:
+                        # добавляем символ
+                        # slepok.append(trans[0])
+                        # ищем индекс
+                        index = -1
+                        for c in range(len(classes)):
+                            if trans[1] in classes[c]:
+                                index = c
+                                break
+                        # добавляем индекс и заново
+                        slepok.append(str(trans[0]) + str(index))
+                    # слепок готов
+                    slepok = "".join(sorted(slepok))
+
+                    if len(new_classes) == 0:
+                        new_classes.append([slepok, [vertex]])
+                    else:
+                        is_add = True
+                        for new_class in new_classes:
+                            if slepok == new_class[0]:
+                                new_class[1].append(vertex)
+                                is_add = False
+                                break
+
+                        if is_add:
+                            new_classes.append([slepok, [vertex]])
+
+            # добавили в новые классы все вершины
+            classes = [i[1] for i in new_classes]
+
+        print([" ".join([j.liter for j in i]) for i in classes])
+
+        is_all_len = True
+        not_one_len = []
+
+        for i in classes:
+            if len(i) != 1:
+                is_all_len = False
+                not_one_len.append(i)
+
+        if is_all_len:
+            return self
+
+        alphabet = " ".join(self.alphabet)
+
+        states = " ".join(["_".join([j.liter for j in i]) for i in classes])
+
+        startstate = ""
+        for i in not_one_len:
+            for j in i:
+                if j == self.startstate:
+                    startstate = "_".join([ii.liter for ii in i])
+                    break
+        if startstate == "":
+            startstate = self.startstate.liter
+
+        finalstates = []
+        for i in not_one_len:
+            for j in i:
+                if j in self.finalstates and not ("_".join([ii.liter for ii in i]) in finalstates):
+                    finalstates.append("_".join([ii.liter for ii in i]))
+                    # break
+        if len(finalstates) == 0:
+            finalstates = [ii.liter for ii in self.finalstates]
+
+        finalstates = " ".join(finalstates)
+
+
+        transitions = self.transitions.copy()
+        for i in not_one_len:
+            new_trans = []
+            for k in transitions:
+                for q in i:
+                    if q.liter == k[0]:
+                        new_trans.append(k)
+                        break
+            transitions = [s.split() for s in list(set([" ".join(j) for j in transitions]) - set(" ".join(j) for j in new_trans))]
+
+            set_with_trans = set()
+            for this_old_trans in new_trans:
+                set_with_trans.add(" ".join(["_".join([ii.liter for ii in i]), this_old_trans[1], this_old_trans[2]]))
+
+            transitions.extend([w.split() for w in set_with_trans])
+
+            for k in transitions:
+                if k[2] in [ii.liter for ii in i]:
+                    k[2] = "_".join([ii.liter for ii in i])
+
+        transitions = "\n".join([i for i in set([" ".join(ii) for ii in transitions])])
+
+        new_automat = determinate()
+
+        data = alphabet + "\n" + states + "\n" + startstate + "\n" + finalstates + "\n" + transitions
+
+        new_automat.init_by_string(data)
+
+        getter().put_automat_into_file(data, self.filename)
+
+        return new_automat
 
 

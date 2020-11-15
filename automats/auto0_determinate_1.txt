@@ -1,0 +1,12 @@
+0 1
+C_A B D E
+C_A
+E
+E 0 B
+B 0 B
+D 1 E
+B 1 D
+D 0 B
+E 1 C_A
+C_A 1 C_A
+C_A 0 B
