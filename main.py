@@ -19,6 +19,24 @@ def main():
     path = input()
 
     determinate_X = determinate.KMP(string)
+
+    # aabraabraaabraa
+    # print(determinate_X.find_substring_string_by_one('a'))
+    # print(determinate_X.find_substring_string_by_one('a'))
+    # print(determinate_X.find_substring_string_by_one('b'))
+    # print(determinate_X.find_substring_string_by_one('r'))
+    # print(determinate_X.find_substring_string_by_one('a'))
+    # print(determinate_X.find_substring_string_by_one('a'))
+    # print(determinate_X.find_substring_string_by_one('b'))
+    # print(determinate_X.find_substring_string_by_one('r'))
+    # print(determinate_X.find_substring_string_by_one('a'))
+    # print(determinate_X.find_substring_string_by_one('a'))
+    # print(determinate_X.find_substring_string_by_one('a'))
+    # print(determinate_X.find_substring_string_by_one('b'))
+    # print(determinate_X.find_substring_string_by_one('r'))
+    # print(determinate_X.find_substring_string_by_one('a'))
+    # print(determinate_X.find_substring_string_by_one('a'))
+
     print(determinate_X.find_substring_file(path))
 
     # determinate_X = determinate.KMP("sxooxss")

@@ -15,7 +15,7 @@ class determinate:
         self.transitions = []
 
         self.is_kmp = False
-        # self.init_string_kmp = ""
+        self.string_kmp = ""
 
         self.filename = ""
         self.loads = ""
@@ -275,7 +275,7 @@ class determinate:
 
         if self.now is None:
             self.now = self.startstate
-            raise Exception("Нет дальнейшего перехода по данному символу")
+            # raise Exception("Нет дальнейшего перехода по данному символу")
 
     def step_check_now(self):
         if (self.ready != self.self_state_ready):
@@ -625,26 +625,42 @@ class determinate:
             self.now = self.startstate
             result = []
             index = 0
+            line = 1
+            position = 0
+
             with open(filename) as file:
                 char = file.read(1)
 
+
                 while char != "":
+
+                    position += 1
+                    if char == "\n":
+                        line += 1
+                        position = 0
+
                     if self.step_check_now()[0]:
-                        result.append(index - int(self.finalstates[0].liter))
+                        result.append([line, position - int(self.finalstates[0].liter)])
+                        # result.append(index - int(self.finalstates[0].liter))
                     self.step_make_one(char)
 
                     index += 1
                     char = file.read(1)
 
+                position += 1
+                if char == "\n":
+                    line += 1
+                    position = 0
+
                 if self.step_check_now()[0]:
-                    result.append(index - int(self.finalstates[0].liter))
+                    result.append([line, position - int(self.finalstates[0].liter)])
+                    # result.append(index - int(self.finalstates[0].liter))
 
                 self.now = self.startstate
                 return result
 
         except:
             raise Exception("Ошибка при открытии файлоподобного объекта")
-
 
     def find_substring_string(self, string):
         if not self.is_kmp:
@@ -664,6 +680,13 @@ class determinate:
         self.now = self.startstate
         return result
 
+    def find_substring_string_by_one_reset(self):
+        self.string_kmp = ""
+
+    def find_substring_string_by_one(self, char):
+        self.string_kmp += char
+        return self.find_substring_string(self.string_kmp)
+
     @staticmethod
     def make_str(alphabet, states, startstate, finalstates, transitions):
         alphabet = " ".join(alphabet)
@@ -680,11 +703,13 @@ class determinate:
     @staticmethod
     def KMP(string):
 
-        # alphabet = [chr(i) for i in range(97, 123)]
-        # alphabet.extend([chr(i) for i in range(65, 91)])
-        # alphabet.extend([chr(i) for i in range(48, 58)])
+        alphabet = [chr(i) for i in range(97, 123)]
+        alphabet.extend([chr(i) for i in range(65, 91)])
+        alphabet.extend([chr(i) for i in range(48, 58)])
+        alphabet.extend(["\\n"])
 
-        alphabet = set(list(string))
+
+        # alphabet = set(list(string))
 
         states = [str(i) for i in range(len(string) + 1)]
 
