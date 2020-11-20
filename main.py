@@ -10,13 +10,28 @@ def main():
     # determinate_X = undeterminate_X.to_determinate()
 
 
-    path_determinate = "automats/auto0"
+    # path_determinate = "automats/auto0"
 
-    determinate_X = determinate()
-    determinate_X.init_by_file(path_determinate)
-    mini_auto = determinate_X.minimise()
+    print("Введите искомую подстроку")
+    string = input()
 
-    mini_auto.print_loads()
+    print("Введите путь к файлоподобному объекту")
+    path = input()
+
+    determinate_X = determinate.KMP(string)
+    print(determinate_X.find_substring_file(path))
+
+    # determinate_X = determinate.KMP("sxooxss")
+    # print(determinate_X.substring("sxooxssxooxssxooxss"))
+
+    # print(determinate_X.sf("5", "01223123445"))
+
+
+
+    # determinate_X.init_by_file(path_determinate)
+    # mini_auto = determinate_X.minimise()
+
+    # mini_auto.print_loads()
 
     # undeterminate_X.print_structure()
     # determinate_X.print_structure()

@@ -5,6 +5,7 @@ from state import state
 
 class determinate:
 
+    #region internal
     def __init__(self):
         self.alphabet = []
         self.states = []
@@ -12,6 +13,9 @@ class determinate:
         self.finalstates = []
         self.vertexs = []
         self.transitions = []
+
+        self.is_kmp = False
+        # self.init_string_kmp = ""
 
         self.filename = ""
         self.loads = ""
@@ -98,7 +102,7 @@ class determinate:
         a.extend(self.states)
         self.states = a
 
-        self.loads = self.make_str()
+        self.loads = self.make_str(self.alphabet, self.states, self.startstate.liter, [i.liter for i in self.finalstates], self.transitions)
 
         self.ready = self.self_state_ready
 
@@ -162,7 +166,7 @@ class determinate:
         sings = self.alphabet.copy()
         sings.extend(self.states)
 
-        if len(sings) != len(set(sings)):
+        if (not self.is_kmp) and len(sings) != len(set(sings)):
             raise Exception("Алфавит и список вершин автомата неуникальны")
 
     def parse_startstate(self):
@@ -260,6 +264,9 @@ class determinate:
             self.finalstates[i] = states[[k.liter for k in self.vertexs].index(self.finalstates[i])]
     #endregion
 
+    #endregion
+
+    #region check
     def step_make_one(self, char):
         if (self.ready != self.self_state_ready):
             raise Exception("Автомат должен быть подготовлен")
@@ -313,17 +320,18 @@ class determinate:
 
     #region geting child
     def x_childs_vertex(self, vertex, char):
-        next_vertex = []
+        next_vertex = None
         for i in vertex.symbol_to_next_state:
             if i[0] == char:
-                next_vertex.extend(i[1:])
-
-        if len(next_vertex) == 0:
-            return None
+                next_vertex = i[1]
+                break
 
         return next_vertex
     #endregion
 
+    #endregion
+
+    #region results
     def print_structure(self):
         if (self.ready != self.self_state_ready):
             raise Exception("Автомат должен быть подготовлен")
@@ -483,19 +491,14 @@ class determinate:
 
         self.ready = self.self_state_unloaded
 
-    def make_str(self):
-        alphabet = " ".join(self.alphabet)
-        states = " ".join(self.states)
-        startstate = self.startstate.liter
-        finalstates = " ".join([i.liter for i in self.finalstates])
 
-        transitions = ""
-        for i in self.transitions:
-            transitions += " ".join(i) + "\n"
 
-        return alphabet + "\n" + states + "\n" + startstate + "\n" + finalstates + "\n" + transitions[:-1]
+    #endregion
 
     def minimise(self):
+        if (self.ready != self.self_state_ready):
+            raise Exception("Автомат должен быть подготовлен")
+
         classes = [list(set(self.vertexs) - set(self.finalstates)), self.finalstates]
         new_classes = []
 
@@ -613,5 +616,124 @@ class determinate:
         getter().put_automat_into_file(data, self.filename)
 
         return new_automat
+
+    def find_substring_file(self, filename):
+        if not self.is_kmp:
+            raise Exception("Автомат должен быть построен по принципам Кнутта-Морриса-Пратта")
+
+        try:
+            self.now = self.startstate
+            result = []
+            index = 0
+            with open(filename) as file:
+                char = file.read(1)
+
+                while char != "":
+                    if self.step_check_now()[0]:
+                        result.append(index - int(self.finalstates[0].liter))
+                    self.step_make_one(char)
+
+                    index += 1
+                    char = file.read(1)
+
+                if self.step_check_now()[0]:
+                    result.append(index - int(self.finalstates[0].liter))
+
+                self.now = self.startstate
+                return result
+
+        except:
+            raise Exception("Ошибка при открытии файлоподобного объекта")
+
+
+    def find_substring_string(self, string):
+        if not self.is_kmp:
+            raise Exception("Автомат должен быть построен по принципам Кнутта-Морриса-Пратта")
+
+        self.now = self.startstate
+        result = []
+
+        for i in range(len(string)):
+            if self.step_check_now()[0]:
+                result.append(i - int(self.finalstates[0].liter))
+            self.step_make_one(string[i])
+
+        if self.step_check_now()[0]:
+            result.append(i - int(self.finalstates[0].liter) + 1)
+
+        self.now = self.startstate
+        return result
+
+    @staticmethod
+    def make_str(alphabet, states, startstate, finalstates, transitions):
+        alphabet = " ".join(alphabet)
+        states = " ".join(states)
+        startstate = startstate
+        finalstates = " ".join(finalstates)
+
+        transition = ""
+        for i in transitions:
+            transition += " ".join(i) + "\n"
+
+        return alphabet + "\n" + states + "\n" + startstate + "\n" + finalstates + "\n" + transition[:-1]
+
+    @staticmethod
+    def KMP(string):
+
+        # alphabet = [chr(i) for i in range(97, 123)]
+        # alphabet.extend([chr(i) for i in range(65, 91)])
+        # alphabet.extend([chr(i) for i in range(48, 58)])
+
+        alphabet = set(list(string))
+
+        states = [str(i) for i in range(len(string) + 1)]
+
+        startstate = "0"
+        finalstates = [states[-1]]
+
+        transitions = []
+
+        for i in range(len(string) + 1):
+            for liter in alphabet:
+                transitions.append([str(i), liter, str(determinate.sf(string, string[:i] + liter))])
+
+        determinate_X = determinate()
+        init = determinate.make_str(alphabet, states, startstate, finalstates, transitions)
+
+        determinate_X.is_kmp = True
+        determinate_X.init_by_string(init)
+
+        getter().put_automat_into_file(init, "automats/KMP")
+
+        return determinate_X
+    #     12345
+    # 2312123
+
+    @staticmethod
+    def sf(start_string, end_string):
+        if len(start_string) == 0 or len(end_string) == 0:
+            return 0
+
+
+        first = len(start_string) - 1
+
+        while True:
+            index = 0
+            last = len(end_string) - 1
+
+            while first >= 0 and end_string[last] != start_string[first]:
+                first -= 1
+
+            if first == -1:
+                return 0
+
+            while first >= 0 and last >= 0 and end_string[last] == start_string[first]:
+                first -= 1
+                last -= 1
+                index += 1
+
+            if first == -1:
+                return index
+
 
 
